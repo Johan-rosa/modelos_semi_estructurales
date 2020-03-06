@@ -1,0 +1,72 @@
+# ###################################################
+# Modelo Semi-Estructural para una Economía Cerrada
+# Marzo, 2020
+# f.ramirez@bancentral.gov.do
+#####################################################
+
+
+block Economia_Cerrada
+{
+  identities
+  {
+  
+  ##1. Curva IS
+  ygap[] = b1*ygap[-1] + b2*E[][ygap[1]] - b3*rgap[] + eta_ygap[]; 
+  
+  ##2. Curva de Phillips
+  pic[] = a1*pic[-1] + a2*E[][pic[1]] + a3*ygap[] + eta_pic[];
+  
+  ##3. Regla de Política Monetaria
+  tpm[] = phi_tpm*tpm[-1] + (1-phi_tpm)*(ibar + phi_pic*(E[][picA2[1]] - meta) + phi_ygap*ygap[]) + eta_tpm[];
+  
+  ##4. Tasa de interés real
+  r[] = tpm[] - E[][pic[1]];
+  
+  ##5. Brecha de tasa de interés real
+  rgap[] =  r[] - rbar;
+  
+  ##6. Crecimiento potencial
+  gybar[] = c1*gybar[-1] + (1-c1)*gss + eta_ybar[];
+  
+  ##7. Crecimiento PIB
+  gy[] =  gybar[] + ygap[] - ygap[-1];
+  
+  ## 8. Inflacion interanual
+  picA[] = 0.25*(pic[]+pic[-1]+pic[-2]+pic[-3]);
+  
+  picA1[] = E[][picA[1]];
+  picA2[] = E[][picA1[1]];
+  
+  };
+  
+  shocks
+  {
+    eta_ygap[], eta_pic[], eta_tpm[], eta_ybar[]; 
+  };
+  
+  calibration
+  {
+    ## Curva IS
+    b1 = 0.50; #Componente de rezago
+    b2 = 0.05; #Componete prospectivo
+    b3 = 0.15; #Brecha de tasa de interés
+
+    ## Curva de Phillips
+    a1 = 0.40;  #Componente de rezago
+    a2 = 0.60; #Compotente prospectivo
+    a3 = 0.05;  #Brecha de producto
+
+    ##Regla de Taylor
+    phi_tpm = 0.70;  #Persistencia TPM
+    phi_pic = 1.50; #Inflación
+    phi_ygap = 0.40;#Brecha de producto
+
+    ##Parametros de estado estacionario
+    ibar = 6;
+    meta = 4;
+    gss  = 5;
+    rbar = 2;
+    c1 = 0.5;
+  };
+  
+};

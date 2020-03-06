@@ -1,0 +1,133 @@
+# ###################################################
+# Modelo Semi-Estructural para una Economía Abierta
+# Marzo, 2020
+# f.ramirez@bancentral.gov.do
+#####################################################
+
+
+block Economia_Abierta
+{
+  identities
+  {
+    ##1. Curva IS
+    
+    ygap[] =  b1*ygap[-1] + b2*E[][ygap[1]] - b3*rgap[] + b4*zgap[] + b5*ystar[] + eta_ygap[];
+    
+    ##2. Curva de Phillips
+    
+    pic[] = a1*pic[-1] + a2*E[][pic[1]] + a3*ygap[] +a4*zgap[] + eta_pic[];
+    
+    ##3. Regla de Taylor
+    
+    tpm[] = phi_in*tpm[-1] + (1-phi_in)*(ibar + phi_pic*(E[][picA[1]] - meta) + phi_ygap*ygap[]) + eta_tpm[];
+    
+    ##4. PIB potencial
+    
+    gybar[] = c1*gybar[-1] + (1-c1)*gss + eta_ybar[];
+    
+    ##5. Crecimiento PIB
+    
+    gy[] =  gybar[] + ygap[] - ygap[-1];
+    
+    ##6. Tasa de interes real
+    
+    r[] = tpm[] - E[][pic[1]];
+    
+    ##7. Brecha de tasa de interes real
+    
+    rgap[]  = r[] - rbar;
+
+    ## 8. Inflacion interanual
+
+    picA[] = 0.25*(pic[] + pic[-1] + pic[-2] + pic[-3]);
+
+    picA1[] = E[][picA[1]];
+    picA2[] = E[][picA1[1]];
+    
+    # Variables externas
+
+    ##9. Brecha de TCR
+
+    zgap[] = zgap[-1] + 0.25*(dz[]-dzbar);
+
+    ##10. TCR
+
+    dz[] = ds[] + pistar[] - pic[];
+
+    ##11. UIP
+
+    tpm[] = istar[] + E[][ds[1]] + risk[] + eta_UIP[];
+
+    ##12. Depreciacion nominal anual
+
+    dsA[] = 0.25*(ds[]+ds[-1]+ds[-2]+ds[-3]);
+
+    ##13. Inflación externa
+
+    pistar[] = c2*pistar[-1] + (1-c2)*pistar_bar + eta_pistar[];
+
+    ##14. IPC externo
+
+    #pstar[] = pstar[-1] + 0.25*pistar[];
+
+    ##15. Tasa de interes externa
+
+    istar[] = c3*istar[-1] + (1-c3)*istar_bar + eta_istar[];
+
+    ##16. Demanda externa
+
+    ystar[] = c4*ystar[-1] + eta_ystar[];
+
+    ##17. Premio por riesgo
+
+    risk[] = c5*risk[-1] + (1-c5)*risk_bar + eta_risk[];
+
+    ##18. IPC doméstico
+
+    #p[] = p[-1] + 0.25*pic[];
+
+  };
+  
+  shocks
+  {
+    eta_ygap[], eta_pic[], eta_tpm[], eta_ybar[], eta_risk[], eta_pistar[], eta_istar[], eta_ystar[], eta_UIP[]; 
+  };
+  
+  calibration
+  {
+    ## Curva IS
+    b1 = 0.50; #Componente de rezago
+    b2 = 0.05; #Componete prospectivo
+    b3 = 0.15; #Brecha de tasa de interés
+    b4 = 0.05; #Brecha Tipo de cambio real
+    b5 = 0.10; #Brecha de producto externa
+
+    ## Curva de Phillips
+    a1 = 0.40;  #Componente de rezago
+    a2 = 0.60;  #Compotente prospectivo
+    a3 = 0.05;  #Brecha de producto
+    a4 = 0.10;  #Tipo de cambio real
+
+    ##Regla de Taylor
+    phi_in = 0.70;  #Persistencia TPM
+    phi_pic = 1.50; #Inflación
+    phi_ygap = 0.40;#Brecha de producto
+
+    ##Parametros de estado estacionario
+    ibar = 7;
+    meta = 4;
+    gss  = 5;
+    rbar = 3;
+    c1 = 0.5;
+    c2 = 0.5;
+    c3 = 0.5;
+    c4 = 0.5;
+    c5 = 0.5;
+    pistar_bar = 2;
+    istar_bar = 2;
+    risk_bar = 3;
+    dzbar = 0;
+    
+  };
+  
+};
